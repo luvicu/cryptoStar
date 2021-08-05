@@ -26,7 +26,7 @@
 
 const HDWalletProvider = require('truffle-hdwallet-provider');
 const infuraKey= "ebb537742bbb47198089f84e80cf9e7d";
-const mnemonic = "rack solar wisdom crop mask taxi burst ecology trend tunnel royal ivory";
+const mnemonic = "my mnemonic";
 
 
 module.exports = {
