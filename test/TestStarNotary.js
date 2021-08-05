@@ -35,6 +35,7 @@ it('lets user1 get the funds after the sale', async() => {
     await instance.createStar('awesome star', starId, {from: user1});
     await instance.putStarUpForSale(starId, starPrice, {from: user1});
     let balanceOfUser1BeforeTransaction = await web3.eth.getBalance(user1);
+    await instance.approve(user2, starId, {from: user1, gasPrice: 0})
     await instance.buyStar(starId, {from: user2, value: balance});
     let balanceOfUser1AfterTransaction = await web3.eth.getBalance(user1);
     let value1 = Number(balanceOfUser1BeforeTransaction) + Number(starPrice);
@@ -52,6 +53,7 @@ it('lets user2 buy a star, if it is put up for sale', async() => {
     await instance.createStar('awesome star', starId, {from: user1});
     await instance.putStarUpForSale(starId, starPrice, {from: user1});
     let balanceOfUser1BeforeTransaction = await web3.eth.getBalance(user2);
+    await instance.approve(user2, starId, {from: user1, gasPrice: 0})
     await instance.buyStar(starId, {from: user2, value: balance});
     assert.equal(await instance.ownerOf.call(starId), user2);
 });
@@ -67,6 +69,7 @@ it('lets user2 buy a star and decreases its balance in ether', async() => {
     await instance.putStarUpForSale(starId, starPrice, {from: user1});
     let balanceOfUser1BeforeTransaction = await web3.eth.getBalance(user2);
     const balanceOfUser2BeforeTransaction = await web3.eth.getBalance(user2);
+    await instance.approve(user2, starId, {from: user1, gasPrice: 0})
     await instance.buyStar(starId, {from: user2, value: balance, gasPrice:0});
     const balanceAfterUser2BuysStar = await web3.eth.getBalance(user2);
     let value = Number(balanceOfUser2BeforeTransaction) - Number(balanceAfterUser2BuysStar);
@@ -76,24 +79,72 @@ it('lets user2 buy a star and decreases its balance in ether', async() => {
 // Implement Task 2 Add supporting unit tests
 
 it('can add the star name and star symbol properly', async() => {
-    // 1. create a Star with different tokenId
-    //2. Call the name and symbol properties in your Smart Contract and compare with the name and symbol provided
+   
+   // 1. create a Star with different tokenId
+   var instance = await StarNotary.deployed();
+   await instance.createStar("newStar",100);
+
+   //2. Call the name and symbol properties in your Smart Contract and compare with the name and symbol provided
+   let tokenName = await instance.name.call();
+   let symbol = await instance.symbol.call();
+   assert.equal(tokenName, "Crypto LuvicuStar");
+   assert.equal(symbol,"CLV");
 });
 
 it('lets 2 users exchange stars', async() => {
+   
+    
     // 1. create 2 Stars with different tokenId
+    var instance = await StarNotary.deployed();
+    var accounts = await web3.eth.getAccounts();
+    var owner1=accounts[0];
+    var owner2=accounts[1];
+    var name1="mystarOne";
+    var name2="mystarTwo";
+    var tokenId1=6;
+    var tokenId2=7;
+    await instance.createStar(name1,tokenId1,{from:owner1});
+    await instance.createStar(name2,tokenId2,{from:owner2});
+
     // 2. Call the exchangeStars functions implemented in the Smart Contract
+    await instance.exchangeStars(tokenId1,tokenId2,{from:owner1});
+
     // 3. Verify that the owners changed
+    assert.equal(await instance.ownerOf(tokenId1),owner2);
+    assert.equal(await instance.ownerOf(tokenId2),owner1);
 });
 
 it('lets a user transfer a star', async() => {
-    // 1. create a Star with different tokenId
-    // 2. use the transferStar function implemented in the Smart Contract
-    // 3. Verify the star owner changed.
+   
+  // 1. create a Star with different tokenId
+  var instance = await StarNotary.deployed();
+  var accounts = await web3.eth.getAccounts();
+  var owner1=accounts[0];
+  var owner2=accounts[1];
+  var name1="myTransferStar";
+  var tokenId1=8;
+  await instance.createStar(name1,tokenId1, {from:owner1});
+
+  // 2. use the transferStar function implemented in the Smart Contract
+  await instance.transferStar(owner2,tokenId1,{from:owner1});
+
+  // 3. Verify the star owner changed.
+  assert.equal(await instance.ownerOf(tokenId1),owner2);
 });
 
 it('lookUptokenIdToStarInfo test', async() => {
+    
     // 1. create a Star with different tokenId
+    var instance = await StarNotary.deployed();
+    var accounts = await web3.eth.getAccounts();
+    var owner1=accounts[0];
+    var tokenId1=9;
+    var originalName='OriginalStarName';
+    await instance.createStar(originalName,tokenId1, {from:owner1});
+
     // 2. Call your method lookUptokenIdToStarInfo
+    var nameTaken = await instance.lookUptokenIdToStarInfo(tokenId1);
+
     // 3. Verify if you Star name is the same
+    assert.equal(nameTaken,originalName);
 });
