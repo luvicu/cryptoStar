@@ -26,7 +26,7 @@
 
 const HDWalletProvider = require('truffle-hdwallet-provider');
 const infuraKey= "ebb537742bbb47198089f84e80cf9e7d";
-const mnemonic = "rack solar wisdom crop mask taxi burst ecology trend tunnel royal ivory";
+const mnemonic = "my private phrase";
 
 
 module.exports = {
@@ -72,9 +72,7 @@ module.exports = {
        provider : () => new HDWalletProvider(mnemonic, "https://rinkeby.infura.io/v3/" + infuraKey),
        network_id: 4,
        gas: 4500000,
-       gasPrice: 10000000000,
-       from:"0xDa425616dF103342358be88E8E94d8f8bFf9A092"
-
+       gasPrice: 10000000000
      },
 
     // Useful for deploying to a public network.
